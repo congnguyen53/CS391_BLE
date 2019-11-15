@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">BLE Sector \'Jamming\'</string>
+    <string name="beacon_1">Beacon 1:</string>
+    <string name="beacon_2">Beacon 2:</string>
+    <string name="beacon_3">Beacon 3:</string>
+    <string name="beacon1_val">-45dBm</string>
+    <string name="beacon2_val">-56dBm</string>
+    <string name="beacon3_val">-77dBm:</string>
+    <string name="connected">Connected!</string>
+    <string name="disconnected">Disconnected!</string>
+    <string name="status">Status:</string>
+    <string name="connect_to_spotify">Connect to Spotify!</string>
+</resources>
