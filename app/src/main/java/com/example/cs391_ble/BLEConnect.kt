@@ -1,5 +1,6 @@
 package com.example.cs391_ble
 
+import android.Manifest
 import android.app.ActivityManager
 import android.bluetooth.*
 import android.content.Context
@@ -12,11 +13,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatDrawableManager.get
 import kotlinx.android.synthetic.main.activity_main.*
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.le.BluetoothLeScanner
+import android.bluetooth.le.ScanCallback
+import android.bluetooth.le.ScanResult
+import android.content.pm.PackageManager
 import androidx.core.app.ComponentActivity
 import androidx.core.app.ComponentActivity.ExtraData
 import androidx.core.content.ContextCompat.getSystemService
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
 import android.view.View
+import androidx.core.content.PermissionChecker
 
 
 private val TAG = BLEConnect::class.java.simpleName
@@ -46,19 +52,12 @@ class BLEConnect: AppCompatActivity()  {
         }
 
         //Now, Initialize a BL Adapter for usage later on...
-        //val bluetoothAdapter:BluetoothAdapter = bluetoothManager.adapter
         // With bluetoothAdapter, one is able to interact with bluetooth devices
-
-
-        //Check if bluetooth is enabled.
-        //val BluetoothAdapter.isDisabled: Boolean
-         //   get() = !isEnabled
-
-
         bluetoothAdapter?.takeIf {!it.isEnabled}?.apply {
             val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-            startActivityForResult(enableBtIntent, 2)
+            startActivityForResult(enableBtIntent, 1)
         }
+
 
         /**
          * Now, Let's connect to a GATT server, aka the BLE devices...
@@ -68,14 +67,21 @@ class BLEConnect: AppCompatActivity()  {
         // initialize null
         //var bluetoothGatt: BluetoothGatt? = null
         // FIRST BLE DEVICES..........
+        var bluetoothLEScanner = bluetoothAdapter?.getBluetoothLeScanner()
+        val bleScanner = object : ScanCallback() {
+            override fun onScanResult(callbackType: Int, result: ScanResult?) {
+                Log.d("ScanDeviceActivity", "onScanResult(): ${result?.device?.address} - ${result?.device?.name}")
+            }
+        }
         var device:BluetoothDevice? = bluetoothAdapter?.getRemoteDevice("80:6F:B0:6C:94:2B")
         var connectionState = STATE_DISCONNECTED
+
         // initialize a callback in order to connect to a Gatt
 
-        var bluetoothGatt:BluetoothGatt? = null
         /**
          * value of rssi resorts here to the callback!!
          */
+        var bluetoothGatt:BluetoothGatt? = null
         val gattCallback = object : BluetoothGattCallback() {
             override fun onConnectionStateChange(
                 gatt: BluetoothGatt,
@@ -84,6 +90,7 @@ class BLEConnect: AppCompatActivity()  {
             ) {
                 val intentAction: String
                 when (newState) {
+                    //if conected state, change variables
                     BluetoothProfile.STATE_CONNECTED -> {
                         intentAction = ACTION_GATT_CONNECTED
                         connectionState = STATE_CONNECTED
@@ -104,28 +111,36 @@ class BLEConnect: AppCompatActivity()  {
             }
         }
 
-        // retrieves
-        var isConnected:Boolean? = bluetoothGatt?.readRemoteRssi()
+        // retrieves rssi below and device info...
+        connectionState= STATE_CONNECTED
         bluetoothGatt = device?.connectGatt(this, true,gattCallback)
-        var rssi:Int = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, java.lang.Short.MIN_VALUE).toInt()
-        Toast.makeText(this,"Successfully connected to beacon!",Toast.LENGTH_LONG)
-        gattCallback.onReadRemoteRssi(bluetoothGatt,6,1)
-        //Beacon1RSSI.setText(Integer.toString(rssi))
+        Log.i(TAG,"Trying to connect")
+
+
         bluetoothGatt?.connect()
 
-        Beacon1RSSI.setText(bluetoothGatt?.readRemoteRssi().toString())
 
-
-        // Gatt creation, callback will go to mGattCallback
-        //bluetoothGatt?.discoverServices()
+        var rssi = intent.getShortExtra(BluetoothDevice.EXTRA_RSSI, java.lang.Short.MIN_VALUE)
+        Toast.makeText(this,"Successfully connected to beacon!",Toast.LENGTH_LONG)
+        var isConnected:Boolean? = bluetoothGatt?.readRemoteRssi()
+        gattCallback.onReadRemoteRssi(bluetoothGatt,rssi.toInt(),1)
+        //Beacon1RSSI.setText(Integer.toString(rssi))
         //bluetoothGatt?.connect()
+        /**
+         * Allows for user to accept location permission for location...
+         */
+        when (PermissionChecker.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)) {
+            PackageManager.PERMISSION_GRANTED -> bluetoothLEScanner?.startScan(bleScanner)
+            else -> requestPermissions(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), 1)
+        }
+        Beacon1RSSI.setText( device?.address +" " +  isConnected + rssi.toString())
 
     }
     private fun broadcastUpdate(action: String) {
         val intent = Intent(action)
         sendBroadcast(intent)
     }
-
-
-
 }
+
+private class LeScanRecord(val device: BluetoothDevice, val rssi: Int)
+
