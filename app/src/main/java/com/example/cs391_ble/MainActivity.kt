@@ -15,6 +15,7 @@ import com.spotify.android.appremote.api.Connector
 import com.spotify.android.appremote.api.SpotifyAppRemote
 import com.spotify.protocol.types.Track
 import kotlinx.android.synthetic.main.activity_main.*
+import java.lang.Thread.sleep
 
 
 enum class PlayingState {
@@ -42,8 +43,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val intent = Intent(this, BLEConnect::class.java)
-        startActivity(intent)
+        //val intent = Intent(this, BLEConnect::class.java)
+        //startActivity(intent)
+
 
 
         /*
@@ -52,16 +54,19 @@ class MainActivity : AppCompatActivity() {
          */
         SpotifyAPIBUTTON.setOnClickListener {
             SpotifyService.connect(this) {
-                val intent = Intent(this, PlayerActivity::class.java)
-                startActivity(intent)
                 /*
                 Testing purposes...  remove later on...
                  */
                 SpotifyService.play("spotify:playlist:71JXQ7EwfZMKmLPrzKZAB4")
                 // Toast message to confirm connection...
                 Toast.makeText(this,"CONNECTED!",Toast.LENGTH_LONG).show()
+                //val intent = Intent(this, PlayerActivity::class.java)
+                //startActivity(intent)
             }
-            SpotifyAPIBUTTON.visibility= View.INVISIBLE
+
+            sleep(1000)
+            val intent = Intent(this, BLEConnect::class.java)
+            startActivity(intent)
         }
     }
 
