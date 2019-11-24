@@ -130,7 +130,7 @@
         android:layout_height="37dp"
         android:layout_marginEnd="7dp"
         android:layout_marginBottom="16dp"
-        android:text="@string/connected"
+        android:text="@string/disconnected"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/SpotifyAPIBUTTON"
         app:layout_constraintStart_toStartOf="parent" />

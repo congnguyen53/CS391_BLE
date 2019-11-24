@@ -2,8 +2,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:dist="http://schemas.android.com/apk/distribution"
     package="com.example.cs391_ble">
-
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <dist:module dist:instant="true" />
+    <uses-feature                               android:name="android.hardware.bluetooth_le"                               android:required="true" />
+
 
     <application
         android:allowBackup="true"
@@ -12,15 +16,22 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".BLEConnect">
+            <intent-filter>
+                <action android:name="android.intent.action.BLECONNECT" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity android:name=".PlayerActivity">
             <intent-filter>
-                <action android:name="android.intent.action.PLAYERACTIVITY" />
+                <action android:name="android.intent.action.SPOTIFYPLAYER" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

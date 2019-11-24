@@ -10,4 +10,5 @@
     <string name="disconnected">Disconnected!</string>
     <string name="status">Status:</string>
     <string name="connect_to_spotify">Connect to Spotify!</string>
+    <string name="ble_not_supported">ble_not_supported</string>
 </resources>
