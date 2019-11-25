@@ -79,6 +79,7 @@ class BLEConnect: AppCompatActivity()  {
         // FIRST BLE DEVICES..........
         var bluetoothLEScanner = bluetoothAdapter?.getBluetoothLeScanner()
         var device: BluetoothDevice? = bluetoothAdapter?.getRemoteDevice("80:6F:B0:6C:94:2B")
+        var device2: BluetoothDevice? = bluetoothAdapter?.getRemoteDevice("E0:7D:EA:2D:29:AB")
         var connectionState = STATE_DISCONNECTED
 
         // initialize a callback in order to connect to a Gatt
@@ -120,11 +121,14 @@ class BLEConnect: AppCompatActivity()  {
         // retrieves rssi below and device info...
         connectionState = STATE_CONNECTED
         bluetoothGatt = device?.connectGatt(this, true, gattCallback)
+        var bluetoothGatt2 = device2?.connectGatt(this,true,gattCallback)
         Log.i(TAG, "Trying to connect")
         // CONNECTION INITIALIZATION
 
 
-        var rssi:Int = 0
+        var rssi1:Int = 0
+        var rssi2:Int = 0
+        var rssi3:Int = 0
 
         // Stores all of the important info in this callback
         var scanCallback = object : ScanCallback() {
@@ -135,8 +139,12 @@ class BLEConnect: AppCompatActivity()  {
                 )
                 //Setting rssi ..... First implementation...
                 if(result?.device?.address == "80:6F:B0:6C:94:2B")
-                    rssi = result.getRssi(); //RSSI value
-                Beacon1RSSI.text=Integer.toString(rssi) + " dBm"
+                    rssi1 = result.getRssi(); //RSSI value
+                if(result?.device?.address == "E0:7D:EA:2D:29:AB")
+                    rssi2 = result.getRssi(); //RSSI value
+
+                Beacon1RSSI.text=Integer.toString(rssi1) + " dBm"
+                Beacon2RSSI.text=Integer.toString(rssi2) + " dBm"
             }
         }
         /**
@@ -148,18 +156,21 @@ class BLEConnect: AppCompatActivity()  {
         }
         //bluetoothLEScanner?.startScan(scanCallback) // points above and retrieves
         bluetoothGatt?.connect()
+        bluetoothGatt2?.connect()
         sleep(1000)
         Toast.makeText(this, "Successfully connected to beacon!", Toast.LENGTH_LONG)
         //bluetoothLEScanner?.stopScan(scanCallback)
-        Log.i(TAG, Integer.toString(rssi))
         var isConnected:Boolean? = bluetoothGatt?.readRemoteRssi()
+        var isConnected2:Boolean? = bluetoothGatt2?.readRemoteRssi()
 
         //sleep(5000)
 
-        gattCallback.onReadRemoteRssi(bluetoothGatt,rssi,0)
+        gattCallback.onReadRemoteRssi(bluetoothGatt,rssi1,0)
+        gattCallback.onReadRemoteRssi(bluetoothGatt2,rssi2,0)
         //Beacon1RSSI.setText(Integer.toString(rssi))
-        //bluetoothGatt?.connect()
         bluetoothGatt?.connect()
+        bluetoothGatt2?.connect()
+        //bluetoothGatt?.connect()
 
     }
 
