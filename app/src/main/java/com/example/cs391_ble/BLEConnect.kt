@@ -47,7 +47,11 @@ class BLEConnect: AppCompatActivity()  {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
         SpotifyAPIBUTTON.visibility = View.INVISIBLE
+
+        progressBar.visibility = View.INVISIBLE
+
         isConnectedText.setText("Connected!")
         Toast.makeText(this, "Done", Toast.LENGTH_LONG).show()
         // Represents bluetooth device on phone.
@@ -132,7 +136,7 @@ class BLEConnect: AppCompatActivity()  {
                 //Setting rssi ..... First implementation...
                 if(result?.device?.address == "80:6F:B0:6C:94:2B")
                     rssi = result.getRssi(); //RSSI value
-                Beacon1RSSI.text=Integer.toString(rssi)
+                Beacon1RSSI.text=Integer.toString(rssi) + " dBm"
             }
         }
         /**
@@ -156,10 +160,8 @@ class BLEConnect: AppCompatActivity()  {
         //Beacon1RSSI.setText(Integer.toString(rssi))
         //bluetoothGatt?.connect()
         bluetoothGatt?.connect()
-        //Beacon1RSSI.text = device?.address +  isConnected + rssi.toString()
 
     }
-
 
 
 

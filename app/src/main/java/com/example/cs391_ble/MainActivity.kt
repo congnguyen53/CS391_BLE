@@ -53,6 +53,7 @@ class MainActivity : AppCompatActivity() {
          default playlist.
          */
         SpotifyAPIBUTTON.setOnClickListener {
+            progressBar.visibility = View.VISIBLE
             SpotifyService.connect(this) {
                 /*
                 Testing purposes...  remove later on...

@@ -160,10 +160,34 @@
         android:layout_marginEnd="3dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="0.685"
         app:layout_constraintStart_toEndOf="@+id/SpotifyAPIBUTTON"
         app:layout_constraintTop_toBottomOf="@+id/Beacon3RSSI"
         app:layout_constraintVertical_bias="1.0"
         app:srcCompat="@drawable/spotify_logo" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" />
+
+    <Switch
+        android:id="@+id/on_Switch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginEnd="248dp"
+        android:layout_marginBottom="103dp"
+        android:text="@string/Beacon_on"
+        android:textOff="@string/off"
+        android:textOn="@string/on"
+        app:layout_constraintBottom_toTopOf="@+id/Beacon1Text"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
