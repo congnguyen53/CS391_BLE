@@ -21,9 +21,12 @@ import androidx.core.app.ComponentActivity
 import androidx.core.app.ComponentActivity.ExtraData
 import androidx.core.content.ContextCompat.getSystemService
 import android.icu.lang.UCharacter.GraphemeClusterBreak.T
+import android.text.format.Time
 import android.view.View
 import androidx.core.content.PermissionChecker
 import java.lang.Thread.sleep
+import java.util.Date
+import kotlin.system.measureNanoTime
 
 
 private val TAG = BLEConnect::class.java.simpleName
@@ -36,21 +39,45 @@ const val ACTION_GATT_CONNECTED = "com.example.cs391_ble.ACTION_GATT_CONNECTED"
 const val ACTION_GATT_DISCONNECTED = "com.example.cs391_ble.ACTION_GATT_DISCONNECTED"
 const val ACTION_GATT_SERVICES_DISCOVERED =
     "com.example.cs391_ble.ACTION_GATT_SERVICES_DISCOVERED"
+/**
+ * Coordinate-based system!
+ */
+private val BEACON1_COORD = Pair(1,0) //beacon 1 on right of diagram
+private val BEACON2_COORD = Pair(0,2) // beacon 2 in middle
+private val BEACON3_COORD = Pair(-1,0) // beacon 3 on left
 
+var rssi1:Int = 0
+var rssi2:Int = 0
+var rssi3:Int = 0
+
+private const val SYS_DELAY = 0.001 // Reading each Device's rssi creates lag...  Subtract from signal received
+private const val SIGNAL_S = 0.3    //Speed(m) of signal per ns....
 
 /**
  * As of now, everything will be implemented inside the onCreate function, as there is
  * not enough time to fully implement everything with ease.
  */
 class BLEConnect: AppCompatActivity()  {
-    var mContext = this
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         SpotifyAPIBUTTON.visibility = View.INVISIBLE
-
         progressBar.visibility = View.INVISIBLE
+        /**
+         * Listener to check and see if switch is pressed.  Will change mode from RSSI to TDOA
+         */
+        on_Switch.setOnCheckedChangeListener{buttonView, isChecked ->
+            if(isChecked==false){
+                on_Switch.text= getResources().getString(R.string.Beacon_RSSI)
+            }
+            else
+            {
+                on_Switch.text= getResources().getString(R.string.Beacon_TDOA)
+            }
+        }
+        initBLE()
+    }
+    private fun initBLE(){
 
         isConnectedText.setText("Connected!")
         Toast.makeText(this, "Done", Toast.LENGTH_LONG).show()
@@ -59,7 +86,6 @@ class BLEConnect: AppCompatActivity()  {
             val bluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
             bluetoothManager.adapter
         }
-
         //Now, Initialize a BL Adapter for usage later on...
         // With bluetoothAdapter, one is able to interact with bluetooth devices
         bluetoothAdapter?.takeIf { !it.isEnabled }?.apply {
@@ -72,18 +98,12 @@ class BLEConnect: AppCompatActivity()  {
          * Now, Let's connect to a GATT server, aka the BLE devices...
          * Here is where the fun begins...
          */
-
-        // initialize null
-        //var bluetoothGatt: BluetoothGatt? = null
         // FIRST BLE DEVICES..........
         var bluetoothLEScanner = bluetoothAdapter?.getBluetoothLeScanner()
         var device: BluetoothDevice? = bluetoothAdapter?.getRemoteDevice("80:6F:B0:6C:94:2B")
         var device2: BluetoothDevice? = bluetoothAdapter?.getRemoteDevice("E0:7D:EA:2D:29:AB")
         var device3: BluetoothDevice? = bluetoothAdapter?.getRemoteDevice("80:6F:B0:6C:8F:B6")
         var connectionState = STATE_DISCONNECTED
-
-        // initialize a callback in order to connect to a Gatt
-
         /**
          * value of rssi resorts here to the callback!!
          */
@@ -94,6 +114,9 @@ class BLEConnect: AppCompatActivity()  {
                 status: Int,
                 newState: Int
             ) {
+                /**
+                 * INTENTS TO BE IMPLEMENTED
+                 */
                 val intentAction: String
                 when (newState) {
                     //if conected state, change variables
@@ -119,42 +142,37 @@ class BLEConnect: AppCompatActivity()  {
         }
 
         // retrieves rssi below and device info...
-        connectionState = STATE_CONNECTED
-        bluetoothGatt = device?.connectGatt(this, false, gattCallback)
-        var bluetoothGatt2 = device2?.connectGatt(this,false,gattCallback)
-        var bluetoothGatt3 = device3?.connectGatt(this,false,gattCallback)
+        bluetoothGatt = device?.connectGatt(this, true, gattCallback)
+        var bluetoothGatt2 = device2?.connectGatt(this,true,gattCallback)
+        var bluetoothGatt3 = device3?.connectGatt(this,true,gattCallback)
         Log.i(TAG, "Trying to connect")
-        // CONNECTION INITIALIZATION
-
-
-        var rssi1:Int = 0
-        var rssi2:Int = 0
-        var rssi3:Int = 0
 
         // Stores all of the important info in this callback
         var scanCallback = object : ScanCallback() {
             override fun onScanResult(callbackType : Int, result:ScanResult) {
-                bluetoothGatt?.connect()
-                bluetoothGatt2?.connect()
-                bluetoothGatt3?.connect()
+                gattCallback.onReadRemoteRssi(bluetoothGatt,rssi1,0)
+                gattCallback.onReadRemoteRssi(bluetoothGatt2,rssi2,0)
+                gattCallback.onReadRemoteRssi(bluetoothGatt3,rssi3,0)
                 var isConnected:Boolean? = bluetoothGatt?.readRemoteRssi()
+                Log.d("Time1!"," ")
                 var isConnected2:Boolean? = bluetoothGatt2?.readRemoteRssi()
                 var isConnected3:Boolean? = bluetoothGatt3?.readRemoteRssi()
-               // Log.d(
-               //     "ScanDeviceActivity",
-               //     "onScanResult(): ${result?.device?.address} - ${result?.device?.name} - ${result?.rssi}"
-               // )
+                if(isConnected==true && isConnected2==true && isConnected3==true)
+                    connectionState = STATE_CONNECTED
+                else
+                    connectionState = STATE_DISCONNECTED
+                Log.d("isConnect","${isConnected}, ${isConnected2}, ${isConnected3}.")
                 //Setting rssi ..... First implementation...
                 if(result?.device?.address == "80:6F:B0:6C:94:2B")
-                    rssi1 = result.getRssi(); //RSSI value
+                    Log.d("time1!!!","${measureNanoTime {rssi1 = result.getRssi()}}")
                 if(result?.device?.address == "E0:7D:EA:2D:29:AB")
-                    rssi2 = result.getRssi(); //RSSI value
+                    Log.d("time2!!!","${measureNanoTime {rssi2 = result.getRssi()}}")
                 if(result?.device?.address == "80:6F:B0:6C:8F:B6")
-                    rssi3 = result.getRssi(); //RSSI value
-
+                    Log.d("time3!!!","${measureNanoTime {rssi3 = result.getRssi()}}")
                 Beacon1RSSI.text=Integer.toString(rssi1) + " dBm"
                 Beacon2RSSI.text=Integer.toString(rssi2) + " dBm"
                 Beacon3RSSI.text=Integer.toString(rssi3) + " dBm"
+                //angleCalc(bluetoothGatt)
             }
         }
         /**
@@ -163,23 +181,27 @@ class BLEConnect: AppCompatActivity()  {
         when (PermissionChecker.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)) {
             PackageManager.PERMISSION_GRANTED -> {
                 bluetoothLEScanner?.startScan(scanCallback)
-
             }
             else -> requestPermissions(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION), 1)
         }
-        //bluetoothLEScanner?.startScan(scanCallback) // points above and retrieves
         bluetoothGatt?.connect()
         bluetoothGatt2?.connect()
         bluetoothGatt3?.connect()
         sleep(1000)
-        Toast.makeText(this, "Successfully connected to beacon!", Toast.LENGTH_LONG)
+        Toast.makeText(this, "Connected!", Toast.LENGTH_SHORT)
         gattCallback.onReadRemoteRssi(bluetoothGatt,rssi1,0)
         gattCallback.onReadRemoteRssi(bluetoothGatt2,rssi2,0)
         gattCallback.onReadRemoteRssi(bluetoothGatt3,rssi3,0)
-        bluetoothGatt?.connect()
-        bluetoothGatt2?.connect()
-        bluetoothGatt3?.connect()
+    }
 
+    /**
+     * USES TDOA TO CALCULATE LOCATION
+     */
+    fun angleCalc(gatt:BluetoothGatt?){
+        var characteristics: List<BluetoothGattService>? = gatt?.services
+        for(service in characteristics!!){
+            Log.d("servicesss","${service.instanceId}")
+        }
     }
 
 
@@ -191,6 +213,7 @@ class BLEConnect: AppCompatActivity()  {
 
 
 }
+
 
 
 

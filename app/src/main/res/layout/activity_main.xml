@@ -180,7 +180,7 @@
         android:layout_marginTop="5dp"
         android:layout_marginEnd="248dp"
         android:layout_marginBottom="103dp"
-        android:text="@string/Beacon_on"
+        android:text="@string/Beacon_RSSI"
         android:textOff="@string/off"
         android:textOn="@string/on"
         app:layout_constraintBottom_toTopOf="@+id/Beacon1Text"

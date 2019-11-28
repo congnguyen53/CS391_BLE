@@ -13,5 +13,6 @@
     <string name="ble_not_supported">ble_not_supported</string>
     <string name="on">On</string>
     <string name="off">Off</string>
-    <string name="Beacon_on">Beacon On?</string>
+    <string name="Beacon_RSSI">RSSI</string>
+    <string name="Beacon_TDOA">TDOA</string>
 </resources>
