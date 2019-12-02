@@ -50,7 +50,7 @@ var rssi1:Int= 0
 var rssi2:Int = 0
 var rssi3:Int = 0
 var distance: Double = 0.0
-var txPower : Double = -23.0
+var txPower : Double = -4.0
 val pointA1: Double = 1.0
 val pointA2: Double= 0.0
 val pointB1: Double = 0.0
@@ -240,7 +240,7 @@ fun calculateBeaconDistance(rssi: Int): Double {
     var ratio : Double
     var accuracy : Double
     // Manufacture set this power in the device
-    txPower = -23.0
+    txPower = -4.0
     val signalPropagationConstant: Double = 2.0;
     var d = Math.pow(((txPower - rssiD) / (10 * signalPropagationConstant)),10.0)
 
