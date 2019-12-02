@@ -103,6 +103,33 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/Beacon3Text"
         app:layout_constraintTop_toBottomOf="@+id/Beacon2RSSI" />
+    <TextView
+        android:id="@+id/LocationText"
+        android:layout_width="91dp"
+        android:layout_height="44dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="13dp"
+        android:layout_marginEnd="11dp"
+        android:layout_marginBottom="418dp"
+        android:text="@string/location_text"
+        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/Location"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/Beacon3Text" />
+    <TextView
+        android:id="@+id/Location"
+        android:layout_width="207dp"
+        android:layout_height="44dp"
+        android:layout_marginStart="11dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="86dp"
+        android:layout_marginBottom="346dp"
+        android:text="@string/location_val"
+        app:layout_constraintBottom_toTopOf="@+id/SpotifyAPIBUTTON"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/LocationText"
+        app:layout_constraintTop_toBottomOf="@+id/Beacon3Text" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"
