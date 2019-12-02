@@ -60,11 +60,9 @@ val pointC2: Double = 0.0
 var distanceA: Double = 0.0
 var distanceB : Double = 0.0
 var distanceC : Double = 0.0
-var w: Double = 0.0
-var z: Double = 0.0
 var x: Double = 0.0
 var y: Double = 0.0
-var y2: Double = 0.0
+
 
 
 private const val SYS_DELAY = 0.001 // Reading each Device's rssi creates lag...  Subtract from signal received
@@ -194,7 +192,7 @@ class BLEConnect: AppCompatActivity()  {
                 distanceB = calculateBeaconDistance(rssi2)
                 distanceC = calculateBeaconDistance(rssi3)
                 trilateration()
-                Location.text= x.toString() + y.toString()
+                Location.text= "x: " + x.toString() + "/n y:" + y.toString()
 
             }
         }
@@ -236,29 +234,24 @@ class BLEConnect: AppCompatActivity()  {
 
 
 }
-/*The values 0.89976, 7.7095 and 0.111 are the three constants
-calculated when solving for a best fit curve*/
+
 fun calculateBeaconDistance(rssi: Int): Double {
     var rssiD = rssi.toDouble()
     var ratio : Double
     var accuracy : Double
+    // Manufacture set this power in the device
+    txPower = -23.0
+    val signalPropagationConstant: Double = 2.0;
+    var d = Math.pow(((txPower - rssiD) / (10 * signalPropagationConstant)),10.0)
 
-    txPower = -23.0; // Manufacture set this power in the device
+
     if (rssiD == 0.0){
 
        return  -1.0; // if we cannot determine accuracy, return -1.
 
     }
 
-    ratio = rssi*1.0 / txPower;
-    if (ratio < 1.0){
-        return  Math.pow(ratio,10.0);
-
-    }
-    else{
-        accuracy = (0.89976)*Math.pow(ratio,7.7095) + 0.111;
-        return accuracy;
-    }
+    return Math.pow(10*d, ( txPower - rssi) / (10.0 * signalPropagationConstant))
 }
 
 /**
@@ -270,19 +263,22 @@ fun calculateBeaconDistance(rssi: Int): Double {
  */
 
 fun trilateration() {
+    var A: Double
+    var B: Double
+    var C: Double
+    var D: Double
+    var E: Double
+    var F: Double
 
+    A = 2* pointB1 - 2* pointA1
+    B = 2* pointB2 - 2* pointA2
+    C = distanceA*distanceA - distanceB*distanceB - pointA1*pointA1 + pointB1*pointB1 - pointA2*pointA2 + pointB2*pointB2
+    D = 2*pointC1 - 2*pointB1
+    E = 2*pointC2 - 2*pointB2
+    F = distanceB*distanceB - distanceC*distanceC - pointB1*pointB1 + pointC1*pointC1 - pointB2*pointB2 + pointC2*pointC2
+    x = (C*E - F*B) / (E*A - B*D)
+    y = (C*D - A*F) / (B*D - A*E)
 
-    w = distanceA * distanceA - distanceB * distanceB - pointA1 * pointA1 - pointA2* pointA2 + pointB1 * pointB1 + pointB2 * pointB2;
-
-    z = distanceB * distanceB - distanceC * distanceC - pointB1* pointB1 - pointB2 * pointB2 + pointC1 * pointC1 + pointC2 * pointC2;
-
-    x = (w * ( pointC2 - pointB2) - z * ( pointB2 - pointA2)) / (2 * (( pointB1 - pointA1) * ( pointC1 - pointB2) - ( pointC1 - pointB1) * ( pointB2 - pointA2)));
-
-    y = (w - 2 * x * (pointB1 - pointA1)) / (2 * ( pointB2 - pointA2));
-
-    y2 = (z - 2 * x * ( pointC1 -pointB1)) / (2 * ( pointC1 - pointB2));
-
-    y = (y + y2) / 2;
 
 }
 
