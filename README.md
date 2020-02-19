@@ -1,3 +1,3 @@
 # BlueJammin
 Location-Based Spotify Player using 3 BLE Beacons...
-[embed]http://example.com/file.pdf[/embed]
+[embed]https://github.com/congnguyen53/CS391_BLE/blob/master/IEEE%20-%20BLE%20paper.pdf[/embed]
